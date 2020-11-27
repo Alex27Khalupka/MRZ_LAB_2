@@ -76,3 +76,63 @@ def run(
     x = x.reshape(x.shape[0], 1, x.shape[1])
     w1 = (np.random.rand(p + m, m) * 2 - 1) / 10
     w2 = (np.random.rand(m, 1) * 2 - 1) / 10
+    # this code learn for each sample
+    for j in range(max_iter):
+        error_all = 0
+        if code_for_learning[1] == "1":
+            x[:, :, -m:] = 0
+        for i in range(x.shape[0]):
+            hidden_layer = np.matmul(x[i], w1)
+            output = np.matmul(hidden_layer, w2)
+            dy = output - y[i]
+            w1 -= alpha * dy * np.matmul(x[i].transpose(), w2.transpose())
+            w2 -= alpha * dy * hidden_layer.transpose()
+            try:
+                x[i + 1][-m:] = hidden_layer
+            except:
+                pass
+            # print("x=", x[i], "etalon", y[i], "result=", output)
+        for i in range(x.shape[0]):
+            hidden_layer = np.matmul(x[i], w1)
+            output = np.matmul(hidden_layer, w2)
+            dy = output - y[i]
+            error_all += (dy ** 2)[0]
+        print(j + 1, " ", error_all[0])
+        if error_all <= error:
+            break
+
+    print(w1)
+    print(w2)
+    print(error_all)
+    k = y[-1].reshape(1)
+    X = x[-1, 0, :-m]
+    out = []
+    for i in range(predict):
+        X = X[1:]
+        train = np.concatenate((X, k))
+        X = np.concatenate((X, k))
+        train = np.append(train, np.array([0] * m))
+        if code_for_training[0]:
+            train[-m:] = 0
+        hidden_layer = np.matmul(train, w1)
+        output = np.matmul(hidden_layer, w2)
+        k = output
+        out.append(k[0])
+    return out
+
+
+if __name__ == "__main__":
+    print(
+        start(
+            sequence=[1, 2, 6, 24, 120, 720, 5040, 40320],
+            p=3,
+            error=0.00000001,
+            max_iter=1000000,
+            m=2,
+            alpha=0.0000000015,
+            predict=5,
+            code_for_learning="11",
+            code_for_training="11",
+        )
+    )
+
