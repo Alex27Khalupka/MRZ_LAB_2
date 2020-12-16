@@ -1,6 +1,18 @@
+# Authored by Холупко Александр and Мария Жирко
+# 827101
+
 import numpy as np
 
 
+def derivative_function(x):
+    return 1
+
+
+def activation_function(x):
+    return 1 * x
+
+
+# Мария Жирко
 def start(
         sequence: list,
         p: int,
@@ -10,7 +22,6 @@ def start(
         alpha: float,
         predict: int,
         code_for_learning: str,
-        code_for_training: str,
 ):
     if sequence == None:
         sequence = list(
@@ -35,10 +46,6 @@ def start(
         code_for_learning = input(
             "Enter learning code:\n"
         )  # on\off for first|on\off for others
-    if code_for_training == None:
-        code_for_training = input(
-            "Enter training code:\n"
-        )  # on\off for first|on\off for others
 
     x = []
     y = []
@@ -49,7 +56,7 @@ def start(
         i += 1
     y = np.array(y)
     x = np.array(x)
-    return run(x, y, p, q, error, max_iter, m, alpha, predict, code_for_learning, code_for_training)
+    return run(x, y, p, q, error, max_iter, m, alpha, predict, code_for_learning)
 
 
 def run(
@@ -63,8 +70,8 @@ def run(
         alpha: float,
         predict: int,
         code_for_learning: str,
-        code_for_training: str,
 ):
+# Холупко Александр
     error_all = 0
     k = 0
     if code_for_learning[0] == "1":
@@ -82,11 +89,11 @@ def run(
         if code_for_learning[1] == "1":
             x[:, :, -m:] = 0
         for i in range(x.shape[0]):
-            hidden_layer = np.matmul(x[i], w1)
-            output = np.matmul(hidden_layer, w2)
+            hidden_layer = activation_function(np.matmul(x[i], w1))
+            output = activation_function(np.matmul(hidden_layer, w2))
             dy = output - y[i]
-            w1 -= alpha * dy * np.matmul(x[i].transpose(), w2.transpose())
-            w2 -= alpha * dy * hidden_layer.transpose()
+            w1 -= alpha * dy * np.matmul(x[i].transpose(), w2.transpose()) * derivative_function(np.matmul(x[i], w1))
+            w2 -= alpha * dy * hidden_layer.transpose() * derivative_function(np.matmul(hidden_layer, w2))
             try:
                 x[i + 1][-m:] = hidden_layer
             except:
@@ -100,7 +107,7 @@ def run(
         print(j + 1, " ", error_all[0])
         if error_all <= error:
             break
-
+# Мария Жирко
     print(w1)
     print(w2)
     print(error_all)
@@ -112,8 +119,6 @@ def run(
         train = np.concatenate((X, k))
         X = np.concatenate((X, k))
         train = np.append(train, np.array([0] * m))
-        if code_for_training[0]:
-            train[-m:] = 0
         hidden_layer = np.matmul(train, w1)
         output = np.matmul(hidden_layer, w2)
         k = output
@@ -124,15 +129,14 @@ def run(
 if __name__ == "__main__":
     print(
         start(
-            sequence=[1, 2, 6, 24, 120, 720, 5040, 40320],
+            sequence=[1, 2, 4, 8, 16, 32],
             p=3,
             error=0.00000001,
-            max_iter=1000000,
+            max_iter=500000,
             m=2,
-            alpha=0.0000000015,
+            alpha=0.000015,
             predict=5,
-            code_for_learning="11",
-            code_for_training="11",
+            code_for_learning="11"
         )
     )
 
